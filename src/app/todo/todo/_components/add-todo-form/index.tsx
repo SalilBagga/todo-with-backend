@@ -3,13 +3,14 @@
 import { useState, type FormEvent } from "react";
 
 interface AddTodoFormProps {
-  onAdd: (text: string) => void;
+  onAdd: (text: string) => Promise<void>;
+  loading: boolean;
 }
 
-export default function AddTodoForm({ onAdd }: AddTodoFormProps) {
+export default function AddTodoForm({ onAdd, loading }: AddTodoFormProps) {
   const [text, setText] = useState("");
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     const trimmed = text.trim();
@@ -17,7 +18,7 @@ export default function AddTodoForm({ onAdd }: AddTodoFormProps) {
       return;
     }
 
-    onAdd(trimmed);
+    await onAdd(trimmed);
     setText("");
   };
 
@@ -34,7 +35,7 @@ export default function AddTodoForm({ onAdd }: AddTodoFormProps) {
       <button
         type="submit"
         className="rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
-        disabled={!text.trim()}
+        disabled={!text.trim() || loading}
       >
         Add
       </button>

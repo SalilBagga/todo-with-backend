@@ -5,12 +5,12 @@ import { Todo } from "../../types";
 
 interface TodoItemProps {
   todo: Todo;
-  onToggle: (id: string) => void;
-  onDelete: (id: string) => void;
-  onEdit: (id: string, text: string) => void;
+  editTodo: (id: string, text: string) => Promise<void>;
+  toggleComplete: (id: string, completed: boolean) => Promise<void>;
+  deleteTodo: (id: string) => Promise<void>;
 }
 
-export default function TodoItem({ todo, onToggle, onDelete, onEdit }: TodoItemProps) {
+export default function TodoItem({ todo, editTodo, toggleComplete, deleteTodo }: TodoItemProps) {
   const [isEditing, setIsEditing] = useState(false);
 
   const startEditing = () => {
@@ -21,14 +21,14 @@ export default function TodoItem({ todo, onToggle, onDelete, onEdit }: TodoItemP
     setIsEditing(false);
   };
 
-  const commitEdit = (value: string) => {
+  const commitEdit = async (value: string) => {
     const trimmed = value.trim();
     if (!trimmed) {
       cancelEditing();
       return;
     }
 
-    onEdit(todo.id, trimmed);
+    await editTodo(todo.id, trimmed);
     setIsEditing(false);
   };
 
@@ -36,7 +36,7 @@ export default function TodoItem({ todo, onToggle, onDelete, onEdit }: TodoItemP
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
     const value = formData.get("todoText") as string;
-    commitEdit(value);
+    void commitEdit(value);
   };
 
   const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
@@ -50,7 +50,7 @@ export default function TodoItem({ todo, onToggle, onDelete, onEdit }: TodoItemP
       <input
         type="checkbox"
         checked={todo.completed}
-        onChange={() => onToggle(todo.id)}
+        onChange={() => void toggleComplete(todo.id, !todo.completed)}
         aria-label={`Mark "${todo.text}" as ${todo.completed ? "incomplete" : "complete"}`}
         className="h-4 w-4 shrink-0 cursor-pointer accent-gray-900"
       />
@@ -96,7 +96,7 @@ export default function TodoItem({ todo, onToggle, onDelete, onEdit }: TodoItemP
 
       <button
         type="button"
-        onClick={() => onDelete(todo.id)}
+        onClick={() => void deleteTodo(todo.id)}
         aria-label="Delete todo"
         className="shrink-0 rounded-md px-2 py-1 text-xs font-medium text-red-500 transition-colors hover:bg-red-50 hover:text-red-700"
       >
